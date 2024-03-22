@@ -8,10 +8,9 @@ uses
   Horse,
   Horse.Jhonson,
   System.JSON,
-  tarefaController in 'controller\tarefaController.pas';
+  Controller.Tarefa in 'controller\Controller.Tarefa.pas';
 
 begin
   THorse.Use(Jhonson());
   THorse.Listen(9000);
-  tarefaController.Router;
 end.
