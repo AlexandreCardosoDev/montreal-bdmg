@@ -8,9 +8,11 @@ uses
   Horse,
   Horse.Jhonson,
   System.JSON,
-  Controller.Tarefa in 'controller\Controller.Tarefa.pas';
+  Controller.Tarefa in 'controller\Controller.Tarefa.pas',
+  Connection in 'model\Connection.pas';
 
 begin
   THorse.Use(Jhonson());
+  Controller.Tarefa.Router;
   THorse.Listen(9000);
 end.

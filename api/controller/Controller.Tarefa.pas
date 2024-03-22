@@ -14,6 +14,7 @@ implementation
 
 procedure ListarTarefas(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 begin
+
 end;
 
 procedure AdicionarTarefa(Req: THorseRequest; Res: THorseResponse; Next: TProc);
@@ -34,13 +35,13 @@ var
 begin
   v1 := '/api/v1';
   //listar todas as tarefas
-  THorse.Get('/tarefas', ListarTarefas);
+  THorse.Get(v1+'/tarefas', ListarTarefas);
   //adicionar tarefa
-  THorse.Post('/tarefa', AdicionarTarefa);
+  THorse.Post(v1+'/tarefa', AdicionarTarefa);
   //atualizar status da tarefa
-  THorse.Put('/tarefa', AtualizarTarefa);
+  THorse.Put(v1+'/tarefa', AtualizarTarefa);
   //remover tarefa
-  THorse.Delete('/tarefa', DeletarTarefa);
+  THorse.Delete(v1+'/tarefa', DeletarTarefa);
 end;
 
 end.
