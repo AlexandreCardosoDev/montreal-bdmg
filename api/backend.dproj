@@ -91,6 +91,7 @@
         </DelphiCompile>
         <DCCReference Include="controller\Controller.Tarefa.pas"/>
         <DCCReference Include="model\Connection.pas"/>
+        <DCCReference Include="model\Model.Tarefa.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
