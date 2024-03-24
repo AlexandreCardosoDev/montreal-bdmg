@@ -2,7 +2,7 @@ unit Model.Tarefa;
 
 interface
 
-uses System.SysUtils, Data.DB, Data.Win.ADODB, Connection;
+uses System.SysUtils, Data.DB, FireDAC.Comp.Client, Connection;
 
 type
     TTarefa = class
@@ -23,7 +23,7 @@ type
         property INSERIDO_EM : TDateTime read FINSERIDO_EM write FINSERIDO_EM;
         property DATA_CONCLUSAO : TDateTime read FDATA_CONCLUSAO write FDATA_CONCLUSAO;
 
-        function ListarTarefa(out erro: string): TADOQuery;
+        function ListarTarefa(out erro: string): TFDQuery;
         function Inserir(out erro: string): Boolean;
         function Excluir(out erro: string): Boolean;
         function Editar(out erro: string): Boolean;
@@ -45,12 +45,12 @@ end;
 
 function TTarefa.Editar(out erro: string): Boolean;
 var
-    qry : TADOQuery;
+    qry : TFDQuery;
 begin
     try
-        qry := TADOQuery.Create(nil);
-        qry.Connection := Connection.ConexaoADO;
-
+        qry := TFDQuery.Create(nil);
+        qry.Connection := Connection.FConnection;
+        //Atualiza Tarefa
         with qry do
         begin
             Active := false;
@@ -61,11 +61,11 @@ begin
                     'Prioridade = :Prioridade '+
                     'DataConclusao = :DataConclusao ');
             SQL.Add('WHERE IdTarefa = :IdTarefa');
-            Parameters.ParamByName('Descricao').Value := DESCRICAO;
-            Parameters.ParamByName('Status').Value := STATUS;
-            Parameters.ParamByName('Prioridade').Value := PRIORIDADE;
-            Parameters.ParamByName('DataConclusao').Value := DATA_CONCLUSAO;
-            Parameters.ParamByName('IdTarefa').Value := ID_TAREFA;
+            ParamByName('Descricao').Value := DESCRICAO;
+            ParamByName('Status').Value := STATUS;
+            ParamByName('Prioridade').Value := PRIORIDADE;
+            ParamByName('DataConclusao').Value := DATA_CONCLUSAO;
+            ParamByName('IdTarefa').Value := ID_TAREFA;
             ExecSQL;
         end;
 
@@ -83,18 +83,18 @@ end;
 
 function TTarefa.Excluir(out erro: string): Boolean;
 var
-    qry: TADOQuery;
+    qry: TFDQuery;
 begin
     try
-        qry := TADOQuery.Create(nil);
-        qry.Connection := Connection.ConexaoADO;
-
+        qry := TFDQuery.Create(nil);
+        qry.Connection := Connection.FConnection;
+        //Deleta Tarefa
         with qry do
         begin
             Active := false;
             SQL.Clear;
             SQL.Add('DELETE Tarefas WHERE IdTarefa = :IdTarefa');
-            Parameters.ParamByName('IdTarefa').Value := ID_TAREFA;
+            ParamByName('IdTarefa').Value := ID_TAREFA;
             ExecSQL;
         end;
 
@@ -112,12 +112,12 @@ end;
 
 function TTarefa.Inserir(out erro: string): Boolean;
 var
-    qry : TADOQuery;
+    qry : TFDQuery;
 begin
     try
-        qry := TADOQuery.Create(nil);
-        qry.Connection := Connection.ConexaoADO;
-
+        qry := TFDQuery.Create(nil);
+        qry.Connection := Connection.FConnection;
+        //Adiciona Tarefa
         with qry do
         begin
             Active := false;
@@ -126,9 +126,9 @@ begin
             SQL.Add('VALUES(:Descricao, :Status, :Prioridade, GETDATE()) ');
             SQL.Add('Select IdTarefa = SCOPE_IDENTITY()');
 
-            Parameters.ParamByName('Descricao').Value := DESCRICAO;
-            Parameters.ParamByName('Status').Value := STATUS;
-            Parameters.ParamByName('Prioridade').Value := PRIORIDADE;
+            ParamByName('Descricao').Value := DESCRICAO;
+            ParamByName('Status').Value := STATUS;
+            ParamByName('Prioridade').Value := PRIORIDADE;
             Open;
         end;
 
@@ -146,14 +146,14 @@ begin
     end;
 end;
 
-function TTarefa.ListarTarefa(out erro: string): TADOQuery;
+function TTarefa.ListarTarefa(out erro: string): TFDQuery;
 var
-    qry : TADOQuery;
+    qry : TFDQuery;
 begin
     try
-        qry := TADOQuery.Create(nil);
-        qry.Connection := Connection.ConexaoADO;
-
+        qry := TFDQuery.Create(nil);
+        qry.Connection := Connection.FConnection;
+        //Lista Tarefa
         with qry do
         begin
             Active := False;
@@ -162,7 +162,7 @@ begin
             if ID_TAREFA > 0 then
             begin
                 SQL.Add('AND IdTarefa = :IdTarefa');
-                Parameters.ParamByName('IdTarefa').Value := ID_TAREFA;
+                ParamByName('IdTarefa').Value := ID_TAREFA;
             end;
             SQL.Add('ORDER BY Descricao');
             Open;
