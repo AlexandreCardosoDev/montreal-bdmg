@@ -22,6 +22,7 @@ begin
         tarefa := TTarefa.Create;
     except
         res.Send('Erro ao conectar com o banco').Status(500);
+        exit;
     end;
 
     try
@@ -45,12 +46,14 @@ begin
     //Valida ID Parametro
     try
         id := Req.Params['id'].ToInteger;
-        if id < 0 then
+        if id <= 0 then
         begin
-          res.Send(ParamRequired('id','queryParameter')).Status(400);
+          res.Send('Parametro id deve ser maior que 0').Status(400);
+          exit;
         end;
     except
         res.Send(ParamRequired('id','queryParameter')).Status(400);
+        exit;
     end;                                                             
 
     //Busca Tarefa
@@ -59,6 +62,7 @@ begin
         tarefa.ID_TAREFA := id;
     except
         res.Send('Erro ao conectar com o banco').Status(500);
+        exit;
     end;
   
     try
