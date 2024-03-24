@@ -2,20 +2,27 @@ unit Connection;
 
 interface
 
-uses Data.Win.ADODB, System.IniFiles, System.SysUtils;
+uses
+  FireDAC.DApt, FireDAC.Stan.Option, FireDAC.Stan.Intf, FireDAC.UI.Intf,
+  FireDAC.Stan.Error, FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool,
+  FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Phys.SQLite, FireDAC.Phys.SQLiteDef,
+  FireDAC.Stan.ExprFuncs, FireDAC.FMXUI.Wait, Data.DB, FireDAC.Comp.Client,
+  FireDAC.Phys.FB, FireDAC.Phys.FBDef, System.Classes, FireDAC.Phys.MSSQL,
+  System.IniFiles, System.SysUtils;
 
 var
-   ConexaoADO: TADOConnection;
+   FConnection: TFDConnection;
 
-function SetupConnection(ADOConn: TADOConnection): String;
-function Connect : TADOConnection;
+function SetupConnection(FConn: TFDConnection): String;
+function Connect : TFDConnection;
 procedure Disconect;
 
 implementation
 
-function SetupConnection(ADOConn: TADOConnection): String;
+function SetupConnection(FConn: TFDConnection): String;
 var
-    server, database, user, password, arqIni : string;
+    OSAuthent, Mars, driverId, server, database, user, password, arqIni,
+    ApplicationName, Workstation : string;
     ini : TIniFile;
 begin
     try
@@ -33,18 +40,19 @@ begin
             ini := TIniFile.Create(arqIni);
 
             // Buscar dados do arquivo fisico...
-           server   := ini.ReadString('BD', 'Server', EmptyStr);
-           database := ini.ReadString('BD', 'DataBase', EmptyStr);
-           user     := ini.ReadString('BD', 'User', EmptyStr);
-           password := ini.ReadString('BD', 'Password', EmptyStr);
+            driverId := ini.ReadString('BD', 'DriverID', EmptyStr);
+            server   := ini.ReadString('BD', 'Server', EmptyStr);
+            database := ini.ReadString('BD', 'DataBase', EmptyStr);
+            user     := ini.ReadString('BD', 'User_Name', EmptyStr);
+            password := ini.ReadString('BD', 'Password', EmptyStr);
 
-           ADOConn.ConnectionString := 'Provider=SQLNCLI11.1;Persist Security Info=False; '
-                                     + 'User ID=' + user + ';'
-                                     + 'Password=' + password + ';'
-                                     + 'Initial Catalog=' + database + ';'
-                                     + 'Data Source=' + server + ';'
-                                     + 'Use Procedure for Prepare=1;Auto Translate=True;Packet Size=4096;'
-                                     + 'Workstation ID=RYZEN-7;Initial File Name="";Use Encryption for Data=False;Tag with column collation when possible=False;MARS Connection=False;DataTypeCompatibility=0;Trust Server Certificate=False;Server SPN="";Application Intent=READWRITE;';
+            // Buscar dados do arquivo fisico...
+            FConn.Params.Values['DriverID'] := driverId;
+            FConn.Params.Values['Database'] := database;
+            FConn.Params.Values['User_Name'] := user;
+            FConn.Params.Values['Password'] := password;
+            FConn.Params.Values['Server'] := server;
+
            Result := 'OK';
         except on ex:exception do
             Result := 'Erro ao configurar banco: ' + ex.Message;
@@ -56,23 +64,23 @@ begin
     end;
 end;
 
-function Connect: TADOConnection;
+function Connect: TFDConnection;
 begin
-    ConexaoADO := TADOConnection.Create(nil);
-    SetupConnection(ConexaoADO);
-    ConexaoADO.Connected := true;
+    FConnection := TFDConnection.Create(nil);
+    SetupConnection(FConnection);
+    FConnection.Connected := true;
 
-    Result := ConexaoADO;
+    Result := FConnection;
 end;
 
 procedure Disconect;
 begin
-    if Assigned(ConexaoADO) then
+    if Assigned(FConnection) then
     begin
-        if ConexaoADO.Connected then
-            ConexaoADO.Connected := false;
+        if FConnection.Connected then
+            FConnection.Connected := false;
 
-        ConexaoADO.Free;
+        FConnection.Free;
     end;
 end;
 
