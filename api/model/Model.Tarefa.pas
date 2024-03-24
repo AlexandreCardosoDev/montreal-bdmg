@@ -26,7 +26,8 @@ type
         function ListarTarefa(out erro: string): TFDQuery;
         function Inserir(out erro: string): Boolean;
         function Excluir(out erro: string): Boolean;
-        function Editar(out erro: string): Boolean;
+        function EditarStatus(out erro: string): Boolean;
+        function RetornarStatistica(out erro: string): TFDQuery;
 end;
 
 implementation
@@ -43,7 +44,7 @@ begin
     Connection.Disconect;
 end;
 
-function TTarefa.Editar(out erro: string): Boolean;
+function TTarefa.EditarStatus(out erro: string): Boolean;
 var
     qry : TFDQuery;
 begin
@@ -55,16 +56,11 @@ begin
         begin
             Active := false;
             sql.Clear;
-            SQL.Add('UPDATE Tarefas SET       '+
-                    'Descricao = :Descricao,  '+
-                    'Status = :Status,        '+
-                    'Prioridade = :Prioridade '+
-                    'DataConclusao = :DataConclusao ');
+            SQL.Add('UPDATE Tarefas SET Status = :Status ');
+            IF STATUS = 'C' then
+              SQL.Add(', DataConclusao = GETDATE() ');
             SQL.Add('WHERE IdTarefa = :IdTarefa');
-            ParamByName('Descricao').Value := DESCRICAO;
             ParamByName('Status').Value := STATUS;
-            ParamByName('Prioridade').Value := PRIORIDADE;
-            ParamByName('DataConclusao').Value := DATA_CONCLUSAO;
             ParamByName('IdTarefa').Value := ID_TAREFA;
             ExecSQL;
         end;
@@ -174,7 +170,38 @@ begin
 
     except on ex:exception do
         begin
-            erro := 'Erro ao liestar tarefa: ' + ex.Message;
+            erro := 'Erro ao listar tarefa: ' + ex.Message;
+            Result := nil;
+        end;
+    end;
+end;
+
+function TTarefa.RetornarStatistica(out erro: string): TFDQuery;
+var
+    qry : TFDQuery;
+begin
+    try
+        qry := TFDQuery.Create(nil);
+        qry.Connection := Connection.FConnection;
+        //Atualiza Tarefa
+        with qry do
+        begin
+            Active := false;
+            sql.Clear;
+            SQL.Add('SELECT '+
+                    'ISNULL((SELECT COUNT(*) FROM Tarefas),0) AS Total_Tarefas,'+
+                    'ISNULL((SELECT SUM(Prioridade) / COUNT(*) FROM Tarefas WHERE STATUS = ''P''),0) AS Media_Pendente,'+
+                    'ISNULL((SELECT COUNT(*) FROM Tarefas WHERE DATEDIFF(DAY, DataConclusao, GETDATE()) < 7),0) AS Concluidas_Ultimos_7_DIAS');
+            Open;
+            Active := True;
+        end;
+
+        erro := '';
+        result := qry;
+
+    except on ex:exception do
+        begin
+            erro := 'Erro ao retornar estatistica das tarefas: ' + ex.Message;
             Result := nil;
         end;
     end;
