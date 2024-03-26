@@ -57,8 +57,10 @@ begin
             Active := false;
             sql.Clear;
             SQL.Add('UPDATE Tarefas SET Status = :Status ');
-            IF STATUS = 'C' then
-              SQL.Add(', DataConclusao = GETDATE() ');
+            if STATUS = 'C' then
+              SQL.Add(', DataConclusao = GETDATE() ')
+            else
+              SQL.Add(', DataConclusao = null ');
             SQL.Add('WHERE IdTarefa = :IdTarefa');
             ParamByName('Status').Value := STATUS;
             ParamByName('IdTarefa').Value := ID_TAREFA;
@@ -118,8 +120,17 @@ begin
         begin
             Active := false;
             sql.Clear;
-            SQL.Add('INSERT INTO Tarefas (Descricao, Status, Prioridade, InseridoEm) ');
-            SQL.Add('VALUES(:Descricao, :Status, :Prioridade, GETDATE()) ');
+            if STATUS = 'C' then
+            begin
+                SQL.Add('INSERT INTO Tarefas (Descricao, Status, Prioridade, InseridoEm, DataConclusao) ');
+                SQL.Add('VALUES(:Descricao, :Status, :Prioridade, GETDATE(), GETDATE()) ');
+            end
+            else
+            begin
+                SQL.Add('INSERT INTO Tarefas (Descricao, Status, Prioridade, InseridoEm) ');
+                SQL.Add('VALUES(:Descricao, :Status, :Prioridade, GETDATE()) ');
+            end;
+
             SQL.Add('Select IdTarefa = SCOPE_IDENTITY()');
 
             ParamByName('Descricao').Value := DESCRICAO;
